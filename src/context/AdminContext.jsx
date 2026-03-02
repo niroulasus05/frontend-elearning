@@ -1,7 +1,8 @@
 import React, { createContext, useState, useContext } from 'react';
-import { STORAGE_KEYS } from '../constants/constants';
+import { STORAGE_KEYS } from '../lib/constants';
 
-const AdminContext = createContext(null);
+// eslint-disable-next-line react-refresh/only-export-components
+export const AdminContext = createContext(null);
 
 export const AdminProvider = ({ children }) => {
 

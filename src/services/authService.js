@@ -1,16 +1,17 @@
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const mockUsers = [
   {
     id: 1,
     name: "Admin User",
-    email: "admin@primelms.com",
+    email: "user123@elearn.com",
     password: "admin123",
     role: "admin",
   },
   {
     id: 2,
     name: "Demo User",
-    email: "demo@primelms.com",
+    email: "demo123@elearn.com",
     password: "demo123",
     role: "admin",
   },
@@ -20,17 +21,14 @@ const authService = {
   async login(email, password) {
     try {
       await delay(1000);
-
       const user = mockUsers.find(
         (u) =>
           u.email.toLowerCase() === email.toLowerCase() &&
           u.password === password
       );
-
       if (!user) {
         throw new Error("Invalid credentials");
       }
-
       const { password: _, ...userWithoutPassword } = user;
       return {
         success: true,
@@ -50,15 +48,12 @@ const authService = {
   async register(userData) {
     try {
       await delay(1500);
-
       const existingUser = mockUsers.find(
         (u) => u.email.toLowerCase() === userData.email.toLowerCase()
       );
-
       if (existingUser) {
         throw new Error("Email already registered");
       }
-
       const newUser = {
         id: Date.now(),
         name: userData.name,
@@ -66,7 +61,6 @@ const authService = {
         role: "admin",
         registrationDate: new Date().toISOString(),
       };
-
       return {
         success: true,
         user: newUser,
@@ -82,11 +76,10 @@ const authService = {
   async logout() {
     try {
       await delay(300);
-
       return {
         success: true,
       };
-      // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       return {
         success: false,
@@ -98,11 +91,9 @@ const authService = {
   async validateToken(token) {
     try {
       await delay(500);
-
       if (!token) {
         throw new Error("No token provided");
       }
-
       return {
         success: true,
         valid: true,
@@ -119,15 +110,12 @@ const authService = {
   async resetPassword(email) {
     try {
       await delay(1000);
-
       const user = mockUsers.find(
         (u) => u.email.toLowerCase() === email.toLowerCase()
       );
-
       if (!user) {
         throw new Error("Email not found");
       }
-
       return {
         success: true,
         message: "Password reset email sent",

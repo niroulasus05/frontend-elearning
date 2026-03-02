@@ -1,25 +1,29 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { User, Mail, Calendar, BookOpen } from 'lucide-react';
-import { AdminContext } from '../../context/AdminContext';
+import { useAdmin } from '../../context/AdminContext';
 
 function Profile() {
-
-  const { user, viewedCourses } = useContext(AdminContext);
+  const { admin } = useAdmin();
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    bio: user?.bio || 'Passionate learner exploring new technologies and skills.'
+    name: admin?.name || '',
+    email: admin?.email || '',
+    bio: admin?.bio || 'Passionate learner exploring new technologies and skills.'
   });
 
-  const handleSave = () => {
+  // Get viewed courses from localStorage
+  const viewedCourses = JSON.parse(
+    localStorage.getItem('viewedCourses') || '[]'
+  );
 
+  const handleSave = () => {
     console.log('Saving profile:', profileData);
     setIsEditing(false);
   };
 
   return (
     <div className="space-y-6">
+
       {/* Page header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800">Profile</h1>
@@ -28,11 +32,13 @@ function Profile() {
 
       {/* Profile card */}
       <div className="bg-white rounded-lg shadow-md p-8">
+
         {/* Profile header */}
         <div className="flex items-center space-x-6 mb-8">
+
           {/* Avatar */}
           <div className="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center text-white text-3xl font-bold">
-            {user?.name?.charAt(0).toUpperCase() || 'U'}
+            {admin?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
 
           {/* User info */}
@@ -45,7 +51,7 @@ function Profile() {
                 className="text-2xl font-bold text-gray-800 border-b-2 border-blue-500 focus:outline-none mb-2"
               />
             ) : (
-              <h2 className="text-2xl font-bold text-gray-800">{user?.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{admin?.name}</h2>
             )}
             <p className="text-gray-600">Member since {new Date().getFullYear()}</p>
           </div>
@@ -61,6 +67,7 @@ function Profile() {
 
         {/* Profile details */}
         <div className="space-y-6">
+
           {/* Email */}
           <div className="flex items-center space-x-4">
             <Mail className="w-5 h-5 text-gray-500" />
@@ -74,7 +81,7 @@ function Profile() {
                   className="text-gray-800 border-b border-gray-300 focus:outline-none focus:border-blue-500"
                 />
               ) : (
-                <p className="text-gray-800">{user?.email}</p>
+                <p className="text-gray-800">{admin?.email}</p>
               )}
             </div>
           </div>
@@ -114,14 +121,15 @@ function Profile() {
               <p className="text-gray-800">{viewedCourses.length} courses</p>
             </div>
           </div>
+
         </div>
       </div>
 
       {/* Learning stats */}
       <div className="bg-white rounded-lg shadow-md p-8">
         <h3 className="text-xl font-bold text-gray-800 mb-4">Learning Statistics</h3>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
           {/* Courses viewed */}
           <div className="bg-blue-50 rounded-lg p-4">
             <p className="text-blue-600 text-sm font-medium">Courses Viewed</p>
@@ -143,8 +151,10 @@ function Profile() {
               {viewedCourses.length > 0 ? 6 : 0}
             </p>
           </div>
+
         </div>
       </div>
+
     </div>
   );
 }

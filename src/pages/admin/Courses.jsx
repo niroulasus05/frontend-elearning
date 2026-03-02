@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
-import Button from '../../components/Button';
 import SearchFilter from '../../components/SearchFilter';
 import { getAllCourses, addCourse, updateCourse, deleteCourse } from '../../services/courseService';
-import { AdminContext } from '../../context/AdminContext';
+import { COURSE_CATEGORIES, COURSE_PLATFORMS } from '../../lib/constants';
 
 function Courses() {
-
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,9 +22,8 @@ function Courses() {
     description: ''
   });
 
-  const { addViewedCourse } = useContext(AdminContext);
-
   useEffect(() => { loadCourses(); }, []);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { filterCourses(); }, [searchTerm, selectedCategory, courses]);
 
@@ -44,7 +41,9 @@ function Courses() {
 
   const filterCourses = () => {
     let filtered = courses;
-    if (selectedCategory !== 'All') filtered = filtered.filter(c => c.category === selectedCategory);
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(c => c.category === selectedCategory);
+    }
     if (searchTerm) {
       filtered = filtered.filter(c =>
         c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -106,7 +105,14 @@ function Courses() {
     }
   };
 
-  const handleCourseClick = (courseId) => addViewedCourse(courseId);
+  // ✅ Save viewed course to localStorage instead of context
+  const handleCourseClick = (courseId) => {
+    const viewed = JSON.parse(localStorage.getItem('viewedCourses') || '[]');
+    if (!viewed.includes(courseId)) {
+      viewed.push(courseId);
+      localStorage.setItem('viewedCourses', JSON.stringify(viewed));
+    }
+  };
 
   const handleSearch = (term) => setSearchTerm(term);
   const handleFilter = (category) => setSelectedCategory(category);
@@ -121,25 +127,27 @@ function Courses() {
 
   return (
     <div className="space-y-6">
+
       {/* Page header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Course Management</h1>
           <p className="text-gray-600 mt-2">Browse and manage available courses</p>
         </div>
-
-        {/* Reusable Button for Add Course */}
-        <Button onClick={handleAdd} variant="primary" className="flex items-center space-x-2">
+        <button
+          onClick={handleAdd}
+          className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
           <Plus className="w-5 h-5" />
           <span>Add Course</span>
-        </Button>
+        </button>
       </div>
 
-      {/* Search and Filter Section */}
+      {/* Search and Filter */}
       <SearchFilter
         onSearch={handleSearch}
         onFilterChange={handleFilter}
-        categories={categories} // pass categories for dropdown if your component uses it
+        categories={categories}
       />
 
       {/* Courses grid */}
@@ -196,21 +204,105 @@ function Courses() {
                 <X className="w-6 h-6" />
               </button>
             </div>
+
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {/* Form fields */}
-              {/* Submit buttons */}
-              <div className="flex space-x-4">
-                <Button type="submit" variant="primary" className="flex-1">
-                  {editingCourse ? 'Update Course' : 'Add Course'}
-                </Button>
-                <Button type="button" variant="secondary" className="flex-1" onClick={() => setShowModal(false)}>
-                  Cancel
-                </Button>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                <select
+                  value={formData.platform}
+                  onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">Select platform</option>
+                  {COURSE_PLATFORMS.map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {COURSE_CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Rating (0-5)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  value={formData.rating}
+                  onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Enrollments</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.enrollments}
+                  onChange={(e) => setFormData({ ...formData, enrollments: parseInt(e.target.value) })}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  rows="3"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="flex space-x-4 pt-2">
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+                >
+                  {editingCourse ? 'Update Course' : 'Add Course'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 }
